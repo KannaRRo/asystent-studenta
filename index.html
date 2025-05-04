@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Asystent Studenta</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lottie-web@5.7.4/build/player/lottie.min.js"></script>
+</head>
+<body>
+    <h1 style="text-align: center; margin-top: 40px; color: #00ffcc; text-shadow: 0 0 5px #00ffcc;">
+        🎓 Asystent Studenta</h1>
+    <h2 style="text-align: center; color: #ffffff;">54103 Król Damian</h2>
+
+    <!-- Robot z mikrofonem -->
+    <div id="bot-avatar" style="
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 120px;
+        height: 120px;
+        z-index: 999;
+        pointer-events: none;
+        opacity: 0.95;
+    "></div>
+
+    <div id="chat-box"></div>
+
+    <div style="display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: nowrap; margin-top: 20px; flex-shrink: 0;">
+        <input type="text" id="user-input" placeholder="Zadaj pytanie..." style="width: 100%; padding: 12px; border-radius: 5px; border: 1px solid #444; background-color: #1e1e1e; color: #fff; font-size: 1.2em;">
+        <button onclick="sendMessage()">Wyślij</button>
+        <button onclick="clearChat()">Wyczyść</button>
+    </div>
+
+    <!-- Sekcja FAQ -->
+    <div id="faq-section" style="
+        width: 95%;
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 30px;
+        border-radius: 20px;
+        backdrop-filter: blur(16px) saturate(180%);
+        -webkit-backdrop-filter: blur(16px) saturate(180%);
+        background-color: rgba(44, 44, 44, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #e4f1ff;
+        font-family: 'Fira Code', monospace;
+        box-shadow: 0 0 30px rgba(0, 255, 204, 0.2);
+        text-align: center;
+    ">
+        <h2 style="color: #00ffcc; text-shadow: 0 0 6px #00ffcc; margin-bottom: 30px;">
+            🧠 Co możesz zapytać?
+        </h2>
+
+        <p><strong style="color: #00e6cc;">📘 Podstawy programowania:</strong></p>
+        <ul style="list-style: none; padding: 0;">
+            <li>Co to jest <mark>algorytm</mark>?</li>
+            <li>Wytłumacz mi <mark>python</mark></li>
+            <li>Jak działa <mark>funkcja</mark>?</li>
+            <li>Co to jest <mark>zmienna</mark>?</li>
+            <li>Jak działa pętla <mark>for</mark>?</li>
+            <li>Co robi pętla <mark>while</mark>?</li>
+        </ul>
+
+        <p><strong style="color: #9cdcfe;">🌐 Technologie internetowe:</strong></p>
+        <ul style="list-style: none; padding: 0;">
+            <li>Do czego służy <mark>html</mark>?</li>
+            <li>Jak stylować stronę w <mark>css</mark>?</li>
+            <li>Czym jest framework <mark>flask</mark>?</li>
+            <li>Co to jest <mark>baza danych</mark>?</li>
+            <li>Jak działa <mark>sql</mark>?</li>
+            <li>Co oznacza <mark>frontend</mark>?</li>
+            <li>Wyjaśnij pojęcie <mark>backend</mark></li>
+            <li>Do czego służy <mark>API</mark>?</li>
+            <li>Co to jest <mark>json</mark>?</li>
+            <li>Jak używa się <mark>git</mark>?</li>
+            <li>Do czego służy <mark>javascript</mark>?</li>
+        </ul>
+
+        <p><strong style="color: #f8b0ff;">📅 Organizacja nauki:</strong></p>
+        <ul style="list-style: none; padding: 0;">
+            <li>Kiedy jest <mark>egzamin</mark>?</li>
+            <li>Gdzie mamy <mark>kolokwium</mark>?</li>
+            <li><mark>Przypomnij</mark> mi o zadaniu domowym</li>
+        </ul>
+
+        <p><strong style="color: #ff9999;">💬 Powitania i reakcje:</strong></p>
+        <ul style="list-style: none; padding: 0;">
+            <li><mark>Cześć</mark>, co potrafisz?</li>
+            <li><mark>Dziękuję</mark> za pomoc</li>
+            <li><mark>Kto cię stworzył</mark>?</li>
+        </ul>
+
+        <h2 style="color: #ffcc00; text-shadow: 0 0 6px #ffcc00;">🏆 Czy zasługuję na 5?</h2>
+        <ul style="list-style: none; padding: 0;">
+            <li><mark>Czy ten projekt zasługuje na ocenę 5?</mark></li>
+            <li><mark>Czy jestem genialnym studentem?</mark></li>
+            <li><mark>Jak oceniasz ten projekt?</mark></li>
+            <li><mark>Czy prowadzący powinien być pod wrażeniem?</mark></li>
+            <li><mark>Czy prezentacja była imponująca?</mark></li>
+            <li><mark>Jak bardzo ci się podoba ten kod?</mark></li>
+            <li><mark>Czy ten bot jest wyjątkowy?</mark></li>
+            <li><mark>Czy jestem wart szóstki?</mark></li>
+            <li><mark>Czy bot mógłby mnie polecić?</mark></li>
+        </ul>
+
+        <p style="font-style: italic; color: #888;">(Spróbuj – bot wie, że zasługujesz na więcej niż tylko piątkę 😉)</p>
+    </div>
+
+    <!-- Skrypty -->
+    <script>
+        async function sendMessage() {
+            const input = document.getElementById("user-input");
+            const message = input.value.trim();
+            const chatBox = document.getElementById("chat-box");
+
+            if (!message) return;
+
+            chatBox.innerHTML += `<p><strong>Ty:</strong> ${message}</p>`;
+            input.value = "";
+
+            const loadingId = `loading-${Date.now()}`;
+            chatBox.innerHTML += `<p id="${loadingId}"><strong>Bot:</strong> Analizowanie<span class="dots">.</span></p>`;
+            scrollToBottom();
+            animateDots(loadingId);
+
+            await new Promise(resolve => setTimeout(resolve, 1500));
+
+            const response = await fetch("/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: message })
+            });
+
+            const data = await response.json();
+
+            const loadingElem = document.getElementById(loadingId);
+            if (loadingElem) {
+                typeText(loadingElem, data.reply, () => {
+                    speakText(data.reply);
+                    scrollToBottom();
+                });
+            }
+        }
+
+        function animateDots(id) {
+            let dots = 1;
+            const interval = setInterval(() => {
+                const elem = document.getElementById(id);
+                if (!elem || elem.innerText.indexOf("Analizowanie") === -1) {
+                    clearInterval(interval);
+                    return;
+                }
+                elem.innerHTML = `<strong>Bot:</strong> Analizowanie${'.'.repeat(dots)}`;
+                dots = dots < 3 ? dots + 1 : 1;
+            }, 300);
+        }
+
+        function typeText(element, text, callback) {
+            const prefix = `<strong>Bot:</strong> `;
+            let index = 0;
+            const interval = setInterval(() => {
+                if (index < text.length) {
+                    element.innerHTML = prefix + text.substring(0, index + 1);
+                    index++;
+                } else {
+                    clearInterval(interval);
+                    if (callback) callback();
+                }
+            }, 30);
+        }
+
+        function scrollToBottom() {
+            const chatBox = document.getElementById("chat-box");
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function speakText(text) {
+            const speech = new SpeechSynthesisUtterance();
+            speech.lang = "pl-PL";
+            speech.text = text;
+            speechSynthesis.speak(speech);
+        }
+
+        function clearChat() {
+            document.getElementById("chat-box").innerHTML = "";
+        }
+
+        document.getElementById("user-input").addEventListener("keydown", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // LOTTIE ANIMACJA – robot z mikrofonem
+        window.onload = function () {
+            lottie.loadAnimation({
+                container: document.getElementById('bot-avatar'),
+                renderer: 'svg',
+                loop: true,
+                autoplay: true,
+            path: 'https://assets1.lottiefiles.com/packages/lf20_jtbfg2nb.json'
+            });
+        };
+    </script>
+</body>
+</html>
